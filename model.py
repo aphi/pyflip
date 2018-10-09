@@ -91,3 +91,8 @@ class Constraint:
 
     def __repr__(self):
         return f'{self.name}: {self.lhs} {self.mid} {self.rhs}'
+
+# # TODO: implement these useful methods
+# c.is_satisfied() -> bool
+# c.viol() -> negative of slack
+# c.slack() -> qty. if neg this means the constraint is violated
