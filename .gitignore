@@ -1,3 +1,8 @@
+# Pyflip working files
+*.log
+*.lp
+*.sol
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
