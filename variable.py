@@ -181,6 +181,7 @@ class Expression:
         # terms.append('{:+}'.format(self.constant))
         terms = []
 
+        # variables
         if self.var_dict:
             var_iter = iter(self.var_dict.items())
             (var_name, coef) = next(var_iter)
@@ -189,6 +190,10 @@ class Expression:
             for (var_name, coef) in var_iter:
                 terms.append('{} {} {}'.format(sign(coef), abs(coef), var_name))
 
-        if (abs(self.constant) > EPS) or (not self.var_dict):
+        # constant
+        if (not self.var_dict): # when there are no variables, always print (even if zero)
+            terms.append('{}{}'.format(sign(self.constant), abs(self.constant)))
+        elif (abs(self.constant) > EPS): # when there are variables only print when nonzero
             terms.append('{} {}'.format(sign(self.constant), abs(self.constant)))
+
         return ' '.join(terms)

@@ -4,6 +4,30 @@ import os
 
 import pyflip as flp
 
+def lp_model_1():
+    m = flp.Model()
+    v1 = flp.variable.Continuous('v1', 10, 20)
+    v2 = flp.variable.Continuous('v2', 10, 20)
+
+    m += v1, v2
+    m += flp.Objective('max', sum([v1 + v2]))
+    m += flp.Constraint(v2, '<=', -2 * v1 + 50)
+
+    return m
+
+def ip_model_1():
+    m = flp.Model()
+    v1 = flp.variable.Binary('v1')
+    v2 = flp.variable.Integer('v2')
+
+    m += v1, v2
+    m += flp.Objective('min', v2)
+    m += flp.Constraint(v2, '>=', -1.5 * v1 - 1)
+    m += flp.Constraint(v2, '>=', 2.5 * v1 - 5)
+
+    return m
+
+
 class Tests(unittest.TestCase):
 
     def test1(self):
@@ -57,6 +81,26 @@ class Tests(unittest.TestCase):
 
 
     def test4(self):
+        m = lp_model_1()
+        s = flp.solver.Cbc({'time_limit': 10})
+
+        soln, run = s.solve(m)
+
+        self.assertEqual(m.objective.value(soln), 35.0)
+        self.assertEqual(m.variables['v1'].value(soln), 15.0)
+        self.assertEqual(m.variables['v2'].value(soln), 20.0)
+
+    def test4_2(self):
+        m = ip_model_1()
+        s = flp.solver.Cbc({'time_limit': 10})
+        soln, run = s.solve(m)
+
+        self.assertEqual(m.objective.value(soln), -2.0)
+        self.assertEqual(m.variables['v1'].value(soln), 1.0)
+        self.assertEqual(m.variables['v2'].value(soln), -2.0)
+
+
+    def test5(self):
         m = flp.Model()
         v1 = flp.variable.Continuous('v1', 10, 20)
         v2 = flp.variable.Integer('v2', -10)
@@ -69,27 +113,11 @@ class Tests(unittest.TestCase):
         m += flp.Constraint(-v1 + v2, '>=', v3 / 3 - 7.5)
         m += flp.Constraint(sum([v1, v2, v3]), '>=', v3 / 3 - 7.5)
 
-        s = flp.solver.Gurobi({'time_limit': 10})
-        s.set_solver_parameters({'ZeroHalfCuts': 0})
+        s = flp.solver.Cbc({'time_limit': 10})
 
         soln, run = s.solve(m)
 
-        print(m.objective.name, m.objective.value(soln))
-        for var_name, var in m.variables.items():
-            print(var_name, var.value(soln))
-        for con_name, con in m.constraints.items():
-            print(f'{con_name}: {con.lhs} {con.mid} {con.rhs}')
-            print(f'{con.lhs.value(soln)} {con.mid} {con.rhs.value(soln)}')
 
-
-        # print(soln)
-        # print(run.solve_duration)
-        # print(run.parameters)
-
-        # model.objective.value(soln)
-        #
-        full_lp_filename = flp.write_lp_file(m)
-        os.remove(full_lp_filename)
 
 # def setUp(self):
 #     pass
@@ -103,13 +131,10 @@ if __name__ == '__main__':
     # t.test4()
 
 
-#     v.value()
-#
-#     c.is_viol()
-#
-#
-# # should be able to use the
-# # should create auxiliary expressions that aren't part of the model
-# # expr_of_interest = flp.Expression()
-#
-# expr_of_interest.value(soln)
+
+# print(m.objective.name, m.objective, m.objective.value(soln))
+# for var_name, var in m.variables.items():
+#     print(var_name, var.value(soln))
+# for con_name, con in m.constraints.items():
+#     print(f'{con_name}: {con.lhs} {con.mid} {con.rhs}')
+#     print(f'{con.lhs.value(soln)} {con.mid} {con.rhs.value(soln)}')

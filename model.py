@@ -62,7 +62,7 @@ class Objective:
             name = f'obj_{self.obj_ctr}'
             Objective.obj_ctr += 1
 
-        self.expr = expr if expr is not None else Expression()
+        self.expr = Expression(expr) if expr is not None else Expression()
         self.dir = dir
         self.name = name
 
