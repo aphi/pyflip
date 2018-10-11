@@ -3,6 +3,7 @@ import time
 import shutil
 import subprocess
 import os
+import io
 import pdb
 from collections import OrderedDict
 
@@ -118,7 +119,7 @@ class GurobiCL(IPSolverCL):
             'output_file': 'ResultFile'
         }
 
-    def solve(self, model, keep_lp_file=False, keep_sol_file=False, log_filename='log.log'):
+    def solve(self, model, keep_lp_file=False, keep_sol_file=False, log_filename='pyflip.log'):
         self.solver_write_lp_file(model)
 
         # Build command (solver-specific CLI)
@@ -180,7 +181,7 @@ class CbcCL(IPSolverCL):
             'output_file': 'solution'
         }
 
-    def solve(self, model, keep_lp_file=False, keep_sol_file=False, log_filename='log.log'):
+    def solve(self, model, keep_lp_file=False, keep_sol_file=False, log_filename='pyflip.log'):
         self.solver_write_lp_file(model)
 
         # Set model-specific parameters
@@ -199,7 +200,7 @@ class CbcCL(IPSolverCL):
         run = Run(log_filename, params=self.params)
         with run:
             run.log_fo.flush()
-            subprocess.run(cmd, stdout=run.log_fo, stderr=run.log_fo)
+            p = subprocess.run(cmd, stdout=run.log_fo, stderr=run.log_fo)
 
         # Read solution file (solver-specific)
         soln = flp.Solution()
@@ -224,6 +225,7 @@ class Cplex(IPSolver):
         pass
 
 
+
 class Run():
     """
     Solver run context Manager providing timer etc
@@ -232,6 +234,7 @@ class Run():
         self.log_filename = log_filename if log_filename is not None else open(os.devnull, 'w')
         self.params = params if params is not None else {}
         self.term_status = None
+        self.log = '' # only populated at completion
 
     def __enter__(self):
         self.log_fo = open(self.log_filename, 'w')
@@ -243,6 +246,16 @@ class Run():
         self.solve_duration = self.get_duration()
         self.log_fo.write('Run ended\n')
         self.log_fo.close()
+
+        # we need to save the contents of the log.
+        # ideally there would be a split stream way to do this,
+        # however this is a workaround
+        with open(self.log_filename, 'r') as fo:
+            self.log = fo.readlines()
+
+
+    # def write(self, msg):
+    #     self.log_fo.write(msg)
 
     def get_duration(self):
         """

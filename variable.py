@@ -109,6 +109,9 @@ class Expression:
         if var_dict is not None:
             self.var_dict = var_dict
 
+    def var_names(self):
+        return self.var_dict.keys()
+
     def value(self, soln=None):
         tot_value = self.constant
         for var, coef in self.var_dict.items():

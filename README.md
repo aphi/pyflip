@@ -6,15 +6,21 @@ A major focus is features which speed up the model development process, e.g. pro
 
 This project has been written from scratch in 2018, and was inspired by PuLP, CyLP, rust-lp-modeler, and JuMP.
 
+
+Feature requests are welcome.
+
+
 Substantial further work is planned, including;
 - Support for MIP starts
-- Using a FFI to interact directly with solver objects, rather than via lp files (CyLP and JuMP do this well)
 - Graphical presentation of solve process, built on solver logs
+- Read in LP file
+- Easily load and test candidate solutions w.r.t. objective and constraints model.assess(soln)
+    - very useful for debugging a formulation
+    - useful to implement basic heuristics operating on variables (e.g. a known transformation between two solutions in variable-space, e.g. a configuration shuffle)
+- Using a FFI to interact directly with solver objects, rather than via lp files (CyLP and JuMP do this well)
 - Graphical representation of 2D & 3D polytopes using mplot3d
-- Easily load a solution
 - Model debugging: Explain why is model is infeasible.
 - Model debugging: Why a model is unbounded
-- Read in LP file
 - vsum function for faster expression generation
 - extend unit tests for other solvers
 
