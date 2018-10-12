@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from math import inf
 from copy import copy
 from numbers import Number
+from collections import namedtuple
 import pdb
 
 from utils import sign, EPS
@@ -74,6 +75,13 @@ class Integer(Variable):
 class Binary(Integer):
     def __init__(self, name=None):
         super().__init__(name, 0, 1)
+
+
+Term = namedtuple('Term', ['var', 'coef'])
+
+# define this, its magic methods, integrate between variable and expression, and profile all speed options
+# define a vsum function
+# go through all instances where data is copied and assess where its required
 
 
 class Expression:
@@ -176,8 +184,18 @@ class Expression:
 
         return NotImplemented
 
-        #TODO: implement this, and test efficiency. doesn't need to copy
-        # def __iadd__(self, other):
+    #TODO: implement this, and test efficiency. doesn't need to copy
+    def __iadd__(self, other):
+        # merge other_e into copied_e
+        for var_name, coef in other.var_dict.items():
+            self.var_dict.setdefault(var_name, 0.0)
+            self.var_dict[var_name] += coef
+
+        self.constant += other.constant
+
+        return self
+
+
 
     def __repr__(self):
         # terms = ['{:+}{}'.format(coef, var_name) for var_name, coef in self.var_dict.items()]

@@ -1,4 +1,5 @@
 import unittest
+import random
 import pdb
 import os
 
@@ -25,7 +26,54 @@ def ip_model_1():
     m += flp.Constraint(v2, '>=', -1.5 * v1 - 1)
     m += flp.Constraint(v2, '>=', 2.5 * v1 - 5)
 
-    return m
+    return
+
+def big_ip_model_1():
+    model = flp.Model()
+
+    # knapsack
+    class Item:
+        def __init__(self, name, value, size):
+            self.name = str(name)
+            self.value = value
+            self.size = size
+    class Bag:
+        def __init__(self, name, size):
+            self.name = str(name)
+            self.size = size
+
+    import random
+    random.seed(0)
+    N = 50
+
+    items = [Item(i, random.randint(1,100), random.randint(1,100)) for i in range(N)]
+    bags = [Bag(i, random.randint(1,50)) for i in range(N)]
+
+    vars = {}
+    for item in items:
+        for bag in bags:
+            v = flp.variable.Binary(f'v{item.name}_{bag.name}')
+            vars[(item.name, bag.name)] = v
+            model += v
+
+    # obj_expr = sum(item.value * model.variables[f'v{item.name}_{bag.name}'] \
+    #   for item in items for bag in bags)
+    obj_expr = flp.Expression.from_var_dict(dict(model.variables[f'v{item.name}_{bag.name}'], item.value) \
+      for item in items for bag in bags)
+    model += flp.Objective('max', obj_expr)
+
+    # Assign each item at most once
+    for item in items:
+        lhs_expr = sum(model.variables[f'v{item.name}_{bag.name}'] for bag in bags)
+        model += flp.Constraint(lhs_expr, '<=', 1)
+
+    # Fill bag at most to size
+    for bag in bags:
+        lhs_expr = sum(item.size * model.variables[f'v{item.name}_{bag.name}'] for item in items)
+        model += flp.Constraint(lhs_expr, '<=', bag.size)
+
+    s = flp.solver.Cbc({'time_limit': 100})
+    soln, run = s.solve(model)
 
 
 class Tests(unittest.TestCase):
@@ -120,11 +168,39 @@ class Tests(unittest.TestCase):
         self.assertEqual(m.variables['v2'].value(soln), -2.5)
 
 
-if __name__ == '__main__':
-    unittest.main()
-    # t = Tests()
-    # t.test4()
 
+def test1():
+    random.seed(0)
+    N = 3000
+
+    # import timeit
+    # timeit.
+
+    coefs = [random.randint(1,100) for _ in range(N)]
+    vars = [flp.variable.Binary(f'v{i}') for i in range(N)]
+
+    # obj_expr = sum([coef * var \
+    #   for (coef, var) in zip(coefs, vars)])
+
+    obj_expr = flp.Expression = sum([coef * var for (coef, var) in zip(coefs, vars)])
+
+    # fastest way is to supply var_dict
+    # obj_expr = flp.Expression.from_var_dict(dict((var.name, coef) for (coef, var) in zip(coefs, vars)))
+
+
+def timeit():
+    import timeit
+    print(timeit.timeit(test1, number=10))
+
+
+if __name__ == '__main__':
+    # unittest.main()
+    # t = Tests()
+    # t.test_big_ip()
+
+    # big_ip_model_1()
+
+    timeit()
 
 
 # print(m.objective.name, m.objective, m.objective.value(soln))
