@@ -1,8 +1,9 @@
 import os
 import itertools
-
-from variable import Variable, Expression
 from collections import Iterable
+
+import pyflip as flp
+from variable import Variable
 
 class Model:
     counter = itertools.count()
@@ -96,7 +97,7 @@ class Objective:
         if name is None:
             name = f'obj_{next(Objective.counter)}'
 
-        self.expr = Expression(expr) if expr is not None else Expression()
+        self.expr = flp.Expression(expr) if expr is not None else flp.Expression()
         self.dir = dir
         self.name = name
 
@@ -113,13 +114,13 @@ class Constraint:
         if name is None:
             name = f'con_{next(Constraint.counter)}'
 
-        self.lhs = Expression(lhs) if lhs is not None else Expression()
-        self.rhs = Expression(rhs) if rhs is not None else Expression()
+        self.lhs = flp.Expression(lhs) if lhs is not None else flp.Expression()
+        self.rhs = flp.Expression(rhs) if rhs is not None else flp.Expression()
         self.mid = mid if mid is not None else '<='
         self.name = name
 
         # rearrange constraint expressions
-        self._lhs, self._rhs = Expression.rearrange_ineq(lhs, rhs)
+        self._lhs, self._rhs = flp.Expression.rearrange_ineq(lhs, rhs)
 
 
     def __repr__(self):

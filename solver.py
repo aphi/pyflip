@@ -114,10 +114,10 @@ class GurobiCL(IPSolverCL):
         :return: Solver-specific mapping
         """
         # http://www.gurobi.com/documentation/8.0/refman/params.html
-        return {
-            'time_limit': 'TimeLimit',
-            'output_file': 'ResultFile'
-        }
+        return OrderedDict((
+            ('time_limit', 'TimeLimit'),
+            ('output_file', 'ResultFile'),
+        ))
 
     def solve(self, model, keep_lp_file=False, keep_sol_file=False, log_filename='pyflip.log'):
         self.solver_write_lp_file(model)
@@ -161,10 +161,10 @@ class CbcCL(IPSolverCL):
         super().__init__(pyflip_params, solver_params, path_to_solver)
 
         # Set default parameters
-        self.set_solver_params({
-            'printingOptions': 'normal',
-            'timeMode': 'elapsed',
-        })
+        self.set_solver_params(OrderedDict((
+           ('printingOptions', 'normal'),
+           ('timeMode', 'elapsed')
+        )))
 
     @property
     def solver_binary(self):
@@ -176,23 +176,23 @@ class CbcCL(IPSolverCL):
         :return: Solver-specific mapping
         """
         # https://projects.coin-or.org/CoinBinary/export/1059/OptimizationSuite/trunk/Installer/files/doc/cbcCommandLine.pdf
-        return {
-            'time_limit': 'sec',
-            'output_file': 'solution'
-        }
+        return OrderedDict((
+            ('time_limit', 'seconds'),
+            ('output_file', 'solution')
+        ))
 
-    def solve(self, model, keep_lp_file=False, keep_sol_file=False, log_filename='pyflip.log'):
+    def solve(self, model, keep_lp_file=False, keep_sol_file=False, log_filename='pyflip.log',
+              run_pyflip_parameters=None, run_solver_params=None):
         self.solver_write_lp_file(model)
 
-        # Set model-specific parameters
-        value_only_parameters = [] # parameters where key=value
-        value_only_parameters.append(self.full_lp_filename)
-        value_only_parameters.append("solve")
-
         # Build command (solver-specific CLI)
-        args = [self.path_to_solver] + value_only_parameters
+        args = [self.path_to_solver, self.full_lp_filename]
         for param in self.params.values():
-            args.append(f'{param.solver_name} {param.value}')
+            if param.value: #(key,value) parameters
+                args.append(f'{param.solver_name} {param.value}')
+            else: # key-only parameters
+                args.append(f'{param.solver_name}')
+        args.append('solve')
         cmd = ' '.join(args)
         print(cmd)
 
@@ -210,6 +210,11 @@ class CbcCL(IPSolverCL):
             for line in fo:
                 split_line = line.split()
                 soln.assign_var(split_line[1], split_line[2])
+
+        for var in model.variables.values():
+            if var.name not in soln.var_dict:
+                soln.var_dict[var.name] = 0.0
+
 
         # delete files
         if not keep_lp_file:
