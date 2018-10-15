@@ -8,16 +8,16 @@ import pyflip as flp
 
 
 
-def solution_summary(m, soln):
+def solution_summary(m, soln, run):
     print (len(m.variables))
     print (m.objective.value(soln))
+    print (run.term_status)
     # print(m.objective.name, m.objective, m.objective.value(soln))
     # for var_name, var in m.variables.items():
     #     print(var_name, var.value(soln))
     # for con_name, con in m.constraints.items():
     #     print(f'{con_name}: {con.lhs} {con.mid} {con.rhs}')
     #     print(f'{con.lhs.value(soln)} {con.mid} {con.rhs.value(soln)}')
-
 
 
 def lp_model_1():
@@ -43,6 +43,40 @@ def ip_model_1():
 
     return m
 
+def infeasible_ip_model_1():
+    model = flp.Model()
+    v1 = flp.variable.Binary('v1')
+    v2 = flp.variable.Binary('v2')
+    model += v1, v2
+
+    model += flp.Constraint(v1 + v2, '<=', 1)
+    model += flp.Constraint(v1, '>=', 0.1)
+    model += flp.Constraint(v2, '>=', 0.1)
+
+    s = flp.solver.Gurobi({'time_limit': 10})
+    soln, run = s.solve(model, keep_lp_file=True, keep_sol_file=True)
+
+    solution_summary(model, soln, run)
+
+
+def unbounded_ip_model_1():
+    model = flp.Model()
+    v1 = flp.variable.Integer('v1')
+    v2 = flp.variable.Integer('v2')
+    model += v1, v2
+
+    model += flp.Objective('min', v1 + 2 * v2) ### ERROR CHECKING REQUIRED ON INPUT ARGUMENTS
+
+    model += flp.Constraint(v1 + v2, '<=', 1)
+    model += flp.Constraint(v1, '>=', 0.1)
+    model += flp.Constraint(v2, '>=', 0.1)
+
+    s = flp.solver.Gurobi({'time_limit': 10})
+    soln, run = s.solve(model, keep_lp_file=True, keep_sol_file=True)
+
+    solution_summary(model, soln, run)
+
+
 def big_ip_model_1():
     model = flp.Model()
 
@@ -59,7 +93,7 @@ def big_ip_model_1():
 
     import random
     random.seed(0)
-    N_ITEMS = 40
+    N_ITEMS = 100
     N_BAGS = int(N_ITEMS / 4)
     t = time.time()
 
@@ -101,12 +135,12 @@ def big_ip_model_1():
 
     print(3, time.time() - t)
 
-    s = flp.solver.Cbc({'time_limit': 20})
+    s = flp.solver.Gurobi({'time_limit': 10})
     soln, run = s.solve(model,keep_lp_file=True,keep_sol_file=True)
 
     print(4, time.time() - t)
 
-    solution_summary(model, soln)
+    solution_summary(model, soln, run)
 
 
 class Tests(unittest.TestCase):
@@ -242,7 +276,7 @@ def test1():
 def timeit():
     import timeit
     # print(timeit.timeit(test1, number=20))
-    print(timeit.timeit(big_ip_model_1, number=1))
+    print(timeit.timeit(unbounded_ip_model_1, number=1))
 
 
 if __name__ == '__main__':
@@ -251,4 +285,3 @@ if __name__ == '__main__':
     # t.test_big_ip()
 
     timeit()
-

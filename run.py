@@ -1,6 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 import re
+import os
 
 class Run():
     """
