@@ -2,8 +2,9 @@
 from model import *
 from solution import *
 from file_io import *
-from solver_run import *
+from run import *
 from expression import *
+from parameter import *
 
 # keep relative namespace
 import variable

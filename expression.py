@@ -43,8 +43,8 @@ class Expression:
 
     def value(self, soln=None):
         tot_value = self.constant
-        for var, coef in self.var_dict.items():
-            val = soln.var_dict[var]  # try/except
+        for var_name, coef in self.var_dict.items():
+            val = soln.get_val(var_name)
             tot_value += coef * val
 
         return tot_value

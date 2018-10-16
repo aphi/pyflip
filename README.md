@@ -6,9 +6,9 @@ A major focus is features which speed up the model development process, e.g. pro
 
 This project has been written from scratch in 2018, and was inspired by PuLP, CyLP, rust-lp-modeler, and JuMP.
 
+For Python 3.6+. (Earlier 3.X versions will work if you use an f-string backport)
 
-Feature requests are welcome.
-
+Feature requests and PRs are welcome.
 
 Substantial further work is planned, including;
 - Support for MIP starts
@@ -21,11 +21,17 @@ Substantial further work is planned, including;
 - Graphical representation of 2D & 3D polytopes using mplot3d
 - Model debugging: Explain why is model is infeasible.
 - Model debugging: Why a model is unbounded
-- vsum function for faster expression generation
-- extend unit tests for other solvers
+- refactor to use pathlib instead of older-style os calls
+- run log buffering
+- store lp files and sol files in a directory
 
-
+Backwards compatibility might be broken.
 
 Expression handling
 expr_of_interest = flp.Expression()
 expr_of_interest.value(soln)
+
+effortless linear relaxations, and unrelaxations
+
+parameter management (show runs with multiple values exploring effect of cuts or other things)
+( in machine learning this is called hyperparameter optimisation )

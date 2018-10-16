@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
     solvers = [
         flp.solver.Cbc,
-        flp.solver.Gurobi
+        # flp.solver.Gurobi
     ]
     for solver in solvers:
         print(timeit.timeit(functools.partial(big_ip_model_1, solver()), number=1))

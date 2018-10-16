@@ -1,11 +1,18 @@
 """
 Utility functions and constant values
 """
+import uuid
+import time
 
 EPS = 1E-9
 
 def sign(val):
     return '+' if val >= 0 else '-'
+
+def unique_name(trunc_uuid_len=0):
+    time_str = time.strftime('%Y_%m_%d-%H_%M_%S')
+    hex_uuid = uuid.uuid4().hex[-trunc_uuid_len:]
+    return f'{time_str}-{hex_uuid}'
 
 def run_summary(run, soln, model):
     if model.is_feasible(soln):
@@ -17,3 +24,16 @@ f'''Model '{model.name}' with {model.num_vars()} variables and {model.num_cons()
 {solution_status}
 Solver '{run.solver_name}' terminated after {run.solve_duration:.3f} sec with status '{run.term_status}'
 '''
+
+
+# more comprehensive run summary
+
+# print(m.objective.name, m.objective, m.objective.value(soln))
+# for var_name, var in m.variables.items():
+#     print(var_name, var.value(soln))
+# for con_name, con in m.constraints.items():
+#     print(f'{con_name}: {con.lhs} {con.mid} {con.rhs}')
+#     print(f'{con.lhs.value(soln)} {con.mid} {con.rhs.value(soln)}')
+
+
+# model.assess

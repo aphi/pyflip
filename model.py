@@ -1,5 +1,6 @@
 import os
 import itertools
+import enum
 from collections import Iterable
 
 import pyflip as flp
@@ -56,6 +57,20 @@ class Model:
             if var_name not in self.variables:
                 raise RuntimeError(f'Unrecognised variable {var_name}. Variables must be added to model before a dependent constraint or objective')
 
+    def is_feasible(self, soln):
+        """
+        Checks that this solution is feasible, i.e. satisfies all constraints
+        :param soln: Solution object
+        :return: boolean
+        """
+        return all(con.is_satisfied(soln) for con in self.constraints.values())
+
+    def num_vars(self):
+        return len(self.variables)
+
+    def num_cons(self):
+        return len(self.constraints)
+
     def __iadd__(self, other):
         """
         Define the 'model += object' interface
@@ -90,7 +105,6 @@ class Model:
         return '\n'.join(lines)
 
 
-
 class Objective:
     counter = itertools.count()
     def __init__(self, dir='min', expr=None, name=None):
@@ -122,11 +136,24 @@ class Constraint:
         # rearrange constraint expressions
         self._lhs, self._rhs = flp.Expression.rearrange_ineq(lhs, rhs)
 
+    def is_satisfied(self, soln):
+        """
+        Check whether this constraint is satisfied in given solution
+        :param soln: Solution object
+        :return: boolean
+        """
+        lhs_value = self.lhs.value(soln)
+        rhs_value = self.rhs.value(soln)
+        return (self.mid == ConstraintEq.EQ and lhs_value == rhs_value) or \
+            (self.mid == ConstraintEq.LEQ and lhs_value <= rhs_value) or \
+            (self.mid == ConstraintEq.GEQ and lhs_value >= rhs_value)
+
 
     def __repr__(self):
         return f'{self.name}: {self.lhs} {self.mid} {self.rhs}'
 
-# # TODO: implement these useful methods
-# c.is_satisfied() -> bool
-# c.viol() -> negative of slack
-# c.slack() -> qty. if neg this means the constraint is violated
+
+class ConstraintEq(enum.Enum):
+    LEQ = '<='
+    EQ = '='
+    GEQ = '>='

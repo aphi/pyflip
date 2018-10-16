@@ -4,11 +4,13 @@ https://www.ibm.com/support/knowledgecenter/SSSA5P_12.5.0/ilog.odms.cplex.help/C
 http://www.gurobi.com/documentation/8.0/refman/lp_format.html
 """
 from math import isinf
-import uuid
 import os
 
+import pyflip as flp
+
+
 def write_lp_file(model, directory='.', filename=None):
-    filename = filename if filename is not None else f'{model.name}_{uuid.uuid4()}.lp'
+    filename = filename if filename is not None else f'{model.name}-{flp.utils.unique_name(6)}.lp'
     full_filename = os.path.join(directory, filename)
 
     with open(full_filename, 'w') as fp:
@@ -18,7 +20,10 @@ def write_lp_file(model, directory='.', filename=None):
 
         # Objective function
         fp.write(f'{model.objective.dir}\n')
-        fp.write(f'  {model.objective.name}: {model.objective.expr}\n')
+        if model.objective.expr.var_dict:
+            fp.write(f'  {model.objective.name}: {model.objective.expr}\n')
+        else:
+            fp.write(f'  {model.objective.name}:\n') # omit the constant (because it confuses gurobi_cl)
 
         # Constraints (printed in rearranged form)
         fp.write('subject to\n')
