@@ -2,6 +2,7 @@
 *.log
 *.lp
 *.sol
+*.mst
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
