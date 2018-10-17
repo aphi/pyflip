@@ -1,17 +1,31 @@
-#PyFlip
+# PyFlip
 
 PyFlip is a simple and modern library for Linear and Integer Programming in Python 3, offering an API to advanced solvers.
 
 A major focus is features which speed up the model development process, e.g. prototyping, debugging, profiling, and integrating with metaheuristic algorithms.
 
-This project has been written from scratch in 2018, and was inspired by PuLP, CyLP, rust-lp-modeler, and JuMP.
+This project has been written from scratch in 2018, having been inspired by PuLP, CyLP, rust-lp-modeler, and JuMP.
 
 For Python 3.6+. (Earlier 3.X versions will work if you use an f-string backport)
 
 Feature requests and PRs are welcome.
 
-Substantial further work is planned, including;
-- Support for MIP starts
+Current features:
+- CBC and Gurobi support
+
+- Fast expression handling
+    - expr_of_interest = flp.Expression()
+    - expr_of_interest.value(soln)
+
+- Simple IP-to-LP relaxations, and unrelaxations
+
+- Parameter management (TODO: show runs with multiple values exploring effect of cuts or other things)
+( in machine learning this is called hyperparameter optimisation )
+
+- MIP starts
+
+
+Substantial further work is planned, including:
 - Graphical presentation of solve process, built on solver logs
 - Read in LP file
 - Easily load and test candidate solutions w.r.t. objective and constraints model.assess(soln)
@@ -25,13 +39,5 @@ Substantial further work is planned, including;
 - run log buffering
 - store lp files and sol files in a directory
 
-Backwards compatibility might be broken.
 
-Expression handling
-expr_of_interest = flp.Expression()
-expr_of_interest.value(soln)
-
-effortless linear relaxations, and unrelaxations
-
-parameter management (show runs with multiple values exploring effect of cuts or other things)
-( in machine learning this is called hyperparameter optimisation )
+Examples to follow soon. Knapsack with heuristic MIP start. parameter search.
