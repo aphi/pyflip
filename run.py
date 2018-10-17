@@ -4,18 +4,22 @@ import re
 import os
 import enum
 
+import pyflip as flp
+
 class Run:
     """
     Solver run context Manager providing timer etc
     """
-    def __init__(self, solver_name='', params=None):
-        self.log_filename = params.value_by_pyflip_name('output_log_file')
+    def __init__(self, name_prefix='', solver_name='', params=None):
+        self.name = flp.utils.unique_name(name_prefix, trunc_uuid_len=6)
         self.solver_name = solver_name
         self.params = params if params is not None else {}
         self.term_status = None
-        self.log = '' # only populated at completion
+        self.log = '' # only filled at completion
 
     def __enter__(self):
+        self.log_filename = self.params.value_by_pyflip_name('output_log_file')
+
         self.log_fo = open(self.log_filename, 'w')
         self.log_fo.write('Run started\n')
         self.solve_duration = time.perf_counter()
@@ -34,6 +38,7 @@ class Run:
 
     # def write(self, msg):
     #     self.log_fo.write(msg)
+
 
     def get_duration(self):
         """

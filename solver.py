@@ -5,6 +5,7 @@ import subprocess
 import os
 import io
 import pdb
+import itertools
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -73,19 +74,15 @@ class IPSolverCL(IPSolver, ABC):
     def solver_binary(self):
         pass
 
-    def generate_run_params(self, full_lp_filename, log_filename, run_pyflip_params, run_solver_params):
-        unique_run_id = os.path.splitext(full_lp_filename)[0]
-        log_filename = log_filename if log_filename is not None else f'{unique_run_id}.log'
-        soln_filename = f'{unique_run_id}.sol'
-
+    def generate_run_params(self, run_name, run_pyflip_params, run_solver_params):
         run_params = deepcopy(self.params)
         if run_pyflip_params is not None:
             run_params.set_pyflip_params(run_pyflip_params)
         if run_solver_params is not None:
             run_params.set_solver_params(run_solver_params)
-        run_params.set_pyflip_params({'output_lp_file': full_lp_filename}, auto_include=False)
-        run_params.set_pyflip_params({'output_log_file': log_filename}, auto_include=False)
-        run_params.set_pyflip_params({'output_soln_file': soln_filename})
+        run_params.set_pyflip_params({'output_lp_file': f'{run_name}.lp'}, auto_include=False)
+        run_params.set_pyflip_params({'output_log_file': f'{run_name}.log'}, auto_include=False)
+        run_params.set_pyflip_params({'output_soln_file': f'{run_name}.sol'})
         return run_params
 
     def delete_files(self, run_params, keep_log_file, keep_lp_file, keep_sol_file):
@@ -123,6 +120,7 @@ class GurobiCL(IPSolverCL):
         return OrderedDict((
             ('time_limit', 'TimeLimit'),
             ('output_soln_file', 'ResultFile'),
+            ('mipstart', 'InputFile')
         ))
 
     @property
@@ -132,9 +130,24 @@ class GurobiCL(IPSolverCL):
             'Optimal objective': flp.RunStatus.OPTIMAL,
             'Model is infeasible': flp.RunStatus.INFEASIBLE,
             'Infeasible model': flp.RunStatus.INFEASIBLE,
-            # 'Time limit reached': flp.RunStatus.TIMELIMIT,
+            'Time limit reached': flp.RunStatus.TIMELIMIT,
             'Infeasible or unbounded model': flp.RunStatus.INFEASIBLE_OR_UNBOUNDED,
         }
+
+    def write_mipstart_soln(self, run, soln):
+        """
+        Write mipstart solution file as part of a run
+        http://www.gurobi.com/documentation/8.0/refman/mst_format.html
+        """
+        if not isinstance(soln, flp.Solution):
+            raise RuntimeError('MipStart must be Solution object')
+
+        filename = f'{run.name}.mst'
+        with open(filename, 'w') as fo:
+            for var_name, val in soln.var_dict.items():
+                fo.write(f'{var_name} {val}\n')
+
+        return filename
 
     def read_output_files(self, run, model):
         soln = flp.Solution()
@@ -159,27 +172,34 @@ class GurobiCL(IPSolverCL):
 
         return soln
 
-    def solve(self, model, keep_log_file=False, keep_lp_file=False, keep_sol_file=False, log_filename=None,
+    def solve(self, model, mipstart=None, keep_log_file=False, keep_lp_file=False, keep_sol_file=False, log_filename=None,
               run_pyflip_params=None, run_solver_params=None):
+        # Create solver run object
+        run = flp.Run(name_prefix=model.name.replace(" ", "_"), solver_name=self.name)
+
+        if (mipstart is not None):
+            mipstart_filename = self.write_mipstart_soln(run, mipstart)
+            run_pyflip_params = run_pyflip_params or {}
+            run_pyflip_params['mipstart'] = mipstart_filename
+
         # Generate LP file
-        full_lp_filename = flp.write_lp_file(model)
+        flp.write_lp_file(model, f'{run.name}.lp')
 
         # Define run parameters, extended from solver parameters
-        run_params = self.generate_run_params(full_lp_filename, log_filename, run_pyflip_params, run_solver_params)
+        run.params = self.generate_run_params(run.name, run_pyflip_params, run_solver_params)
 
         # Build command (solver-specific CLI)
         args = [self.path_to_solver]
-        for param in run_params.values():
+        for param in run.params.values():
             if param.auto_include:
                 # if param.value != '': #(key,value) parameter
                 args.append(f'{param.solver_name}={param.value}')
 
-        args.append(run_params.value_by_pyflip_name('output_lp_file'))
+        args.append(run.params.value_by_pyflip_name('output_lp_file'))
         cmd = ' '.join(args)
-        run_params.set_pyflip_params({'cmd': cmd}, auto_include=False)
+        run.params.set_pyflip_params({'cmd': cmd}, auto_include=False)
 
         # Run solver
-        run = flp.Run(solver_name=self.name, params=run_params)
         with run:
             run.log_fo.flush()
             subprocess.run(cmd, stdout=run.log_fo, stderr=run.log_fo)
@@ -188,7 +208,7 @@ class GurobiCL(IPSolverCL):
         soln = self.read_output_files(run, model)
 
         # delete files
-        self.delete_files(run_params, keep_log_file, keep_lp_file, keep_sol_file)
+        self.delete_files(run.params, keep_log_file, keep_lp_file, keep_sol_file)
 
         return soln, run
 
@@ -215,7 +235,8 @@ class CbcCL(IPSolverCL):
         # https://projects.coin-or.org/CoinBinary/export/1059/OptimizationSuite/trunk/Installer/files/doc/cbcCommandLine.pdf
         return OrderedDict((
             ('time_limit', 'seconds'),
-            ('output_soln_file', 'solution')
+            ('output_soln_file', 'solution'),
+            ('mipstart', 'mipstart')
         ))
 
     @property
@@ -227,6 +248,22 @@ class CbcCL(IPSolverCL):
             'Stopped on time': flp.RunStatus.TIMELIMIT,
             'Unbounded': flp.RunStatus.UNBOUNDED
         }
+
+    def write_mipstart_soln(self, run, soln):
+        """
+        Write mipstart solution file as part of a run
+        http://www.gurobi.com/documentation/8.0/refman/mst_format.html
+        """
+        if not isinstance(soln, flp.Solution):
+            raise RuntimeError('MipStart must be Solution object')
+
+        filename = f'{run.name}.mst'
+        with open(filename, 'w') as fo:
+            ctr = itertools.count() # required for formatting
+            for var_name, val in soln.var_dict.items():
+                fo.write(f'{next(ctr)} {var_name} {val}\n')
+
+        return filename
 
     def read_output_files(self, run, model):
         soln = flp.Solution()
@@ -251,17 +288,25 @@ class CbcCL(IPSolverCL):
 
         return soln
 
-    def solve(self, model, keep_log_file=False, keep_lp_file=False, keep_sol_file=False, log_filename=None,
+    def solve(self, model, mipstart=None, keep_log_file=False, keep_lp_file=False, keep_sol_file=False, log_filename=None,
               run_pyflip_params=None, run_solver_params=None):
+        # Create solver run object
+        run = flp.Run(name_prefix=model.name.replace(" ", "_"), solver_name=self.name)
+
+        if (mipstart is not None):
+            mipstart_filename = self.write_mipstart_soln(run, mipstart)
+            run_pyflip_params = run_pyflip_params or {}
+            run_pyflip_params['mipstart'] = mipstart_filename
+
         # Generate LP file
-        full_lp_filename = flp.write_lp_file(model)
+        flp.write_lp_file(model, f'{run.name}.lp')
 
         # Define run parameters, extended from solver parameters
-        run_params = self.generate_run_params(full_lp_filename, log_filename, run_pyflip_params, run_solver_params)
+        run.params = self.generate_run_params(run.name, run_pyflip_params, run_solver_params)
 
         # Build command (solver-specific CLI)
-        args = [self.path_to_solver, run_params.value_by_pyflip_name('output_lp_file')]
-        for param in run_params.values():
+        args = [self.path_to_solver, run.params.value_by_pyflip_name('output_lp_file')]
+        for param in run.params.values():
             if param.auto_include:
                 if param.value != '': #(key,value) parameter
                     if param.pyflip_name == 'output_soln_file':
@@ -271,10 +316,9 @@ class CbcCL(IPSolverCL):
                     args.append(f'{param.solver_name}')
 
         cmd = ' '.join(args)
-        run_params.set_pyflip_params({'cmd': cmd}, auto_include=False)
+        run.params.set_pyflip_params({'cmd': cmd}, auto_include=False)
 
         # Run solver
-        run = flp.Run(solver_name=self.name, params=run_params)
         with run:
             run.log_fo.flush()
             p = subprocess.run(cmd, stdout=run.log_fo, stderr=run.log_fo)
@@ -283,7 +327,7 @@ class CbcCL(IPSolverCL):
         soln = self.read_output_files(run, model)
 
         # delete files
-        self.delete_files(run_params, keep_log_file, keep_lp_file, keep_sol_file)
+        self.delete_files(run.params, keep_log_file, keep_lp_file, keep_sol_file)
 
         return soln, run
 

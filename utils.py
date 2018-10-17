@@ -9,10 +9,13 @@ EPS = 1E-9
 def sign(val):
     return '+' if val >= 0 else '-'
 
-def unique_name(trunc_uuid_len=0):
+def unique_name(prefix='', trunc_uuid_len=0):
     time_str = time.strftime('%Y_%m_%d-%H_%M_%S')
     hex_uuid = uuid.uuid4().hex[-trunc_uuid_len:]
-    return f'{time_str}-{hex_uuid}'
+    if prefix:
+        return f'{prefix}-{time_str}-{hex_uuid}'
+    else:
+        return f'{time_str}-{hex_uuid}'
 
 def run_summary(run, soln, model):
     if model.is_feasible(soln):

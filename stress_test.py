@@ -62,7 +62,8 @@ def big_ip_model_1(solver):
     print('Constraints added', time.time() - t)
 
     solver.set_params({'time_limit': 10})
-    soln, run = solver.solve(model,keep_lp_file=True,keep_sol_file=True)
+    # solver.set_mipstart(soln)
+    soln, run = solver.solve(model, keep_log_file=True, keep_lp_file=True, keep_sol_file=True)
 
     print('Solved', time.time() - t)
 
@@ -90,8 +91,8 @@ if __name__ == '__main__':
     # timeit.timeit(big_ip_model_1(solver), number=1)
 
     solvers = [
-        flp.solver.Cbc,
-        # flp.solver.Gurobi
+        # flp.solver.Cbc,
+        flp.solver.Gurobi
     ]
     for solver in solvers:
         print(timeit.timeit(functools.partial(big_ip_model_1, solver()), number=1))

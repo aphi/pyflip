@@ -9,8 +9,7 @@ import os
 import pyflip as flp
 
 
-def write_lp_file(model, directory='.', filename=None):
-    filename = filename if filename is not None else f'{model.name}-{flp.utils.unique_name(6)}.lp'
+def write_lp_file(model, filename, directory='.'):
     full_filename = os.path.join(directory, filename)
 
     with open(full_filename, 'w') as fp:

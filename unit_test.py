@@ -122,7 +122,7 @@ class Tests(unittest.TestCase):
         model += flp.Constraint(v1, '<=', v3)
         model += flp.Constraint(-v1 + v2, '>=', v3 / 3 - 7.5)
 
-        full_lp_filename = flp.write_lp_file(model)
+        full_lp_filename = flp.write_lp_file(model, 'test.lp')
         p = pathlib.Path(full_lp_filename)
         self.assertEqual(p.is_file(), True)
         p.unlink()
@@ -192,16 +192,18 @@ class Tests(unittest.TestCase):
 
         self.assertIn(run.term_status, (flp.RunStatus.UNBOUNDED, flp.RunStatus.INFEASIBLE_OR_UNBOUNDED))
 
+    def test_mipstart_1(self):
+        model = TestModels.ip_model_1()
 
-    # def test_mipstart(self):
-    #     m = ip_model_1()
-    #
-    #     s = Tests.universal_solver({'time_limit': 10})
-    #     soln, run = s.solve(m)
-    #
-    #     self.assertEqual(m.objective.value(soln), -2.5)
-    #     self.assertEqual(m.variables['v1'].value(soln), 1.0)
-    #     self.assertEqual(m.variables['v2'].value(soln), -2.5)
+        mipstart = flp.Solution()
+        mipstart.set_var('v1', 0)
+        mipstart.set_var('v2', 10)
+
+        s = Tests.universal_solver({'time_limit': 10})
+        soln, run = s.solve(model, mipstart=mipstart, keep_log_file=True)
+
+        # Loaded MIP start with objective 10
+        # MIPStart values read for 2 variables
 
 
 if __name__ == '__main__':
