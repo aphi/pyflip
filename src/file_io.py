@@ -4,13 +4,13 @@ https://www.ibm.com/support/knowledgecenter/SSSA5P_12.5.0/ilog.odms.cplex.help/C
 http://www.gurobi.com/documentation/8.0/refman/lp_format.html
 """
 from math import isinf
-import os
+from os import path
 
 import pyflip as flp
 
 
 def write_lp_file(model, filename, directory='.'):
-    full_filename = os.path.join(directory, filename)
+    full_filename = path.join(directory, filename)
 
     with open(full_filename, 'w') as fp:
 

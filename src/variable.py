@@ -3,15 +3,14 @@ from math import inf
 from copy import copy
 from numbers import Number
 from collections import namedtuple
-import pdb
-import itertools
+from itertools import count
 
 import pyflip as flp
-from expression import Expression
+from .expression import Expression
 
 class Variable(ABC):
     # this doesn't subclass Expression because it's fundamentally a different purpose object
-    counter = itertools.count()
+    counter = count()
 
     @abstractmethod
     def __init__(self, name=None, continuous=True, lower_bound=-inf, upper_bound=inf):

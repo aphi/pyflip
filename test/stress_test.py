@@ -1,6 +1,4 @@
 import random
-import pdb
-import os
 import time
 import timeit
 import functools
@@ -85,8 +83,7 @@ def expression_generation():
     # fastest way is to supply var_dict
     # obj_expr = flp.Expression.from_var_dict(dict((var.name, coef) for (coef, var) in zip(coefs, vars)))
 
-
-if __name__ == '__main__':
+def run():
     # print(timeit.timeit(expression_generation, number=20))
     # timeit.timeit(big_ip_model_1(solver), number=1)
 
@@ -96,3 +93,6 @@ if __name__ == '__main__':
     ]
     for solver in solvers:
         print(timeit.timeit(functools.partial(big_ip_model_1, solver()), number=1))
+
+if __name__ == '__main__':
+    run()

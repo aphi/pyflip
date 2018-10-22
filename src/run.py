@@ -1,8 +1,6 @@
-import time
 import matplotlib.pyplot as plt
-import re
-import os
-import enum
+from time import perf_counter
+from enum import Enum
 
 import pyflip as flp
 
@@ -22,7 +20,7 @@ class Run:
 
         self.log_fo = open(self.log_filename, 'w')
         self.log_fo.write('Run started\n')
-        self.solve_duration = time.perf_counter()
+        self.solve_duration = perf_counter()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
@@ -44,10 +42,10 @@ class Run:
         """
         :return: Seconds elapsed since start of run
         """
-        return time.perf_counter()  - self.solve_duration
+        return perf_counter()  - self.solve_duration
 
 
-class RunStatus(enum.Enum):
+class RunStatus(Enum):
     OPTIMAL = 'Optimal'
     INFEASIBLE = 'Infeasible'
     UNBOUNDED = 'Unbounded'

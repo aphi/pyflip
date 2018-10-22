@@ -1,9 +1,6 @@
 import unittest
-import random
-import pdb
-import os
-import time
-import pathlib
+from os import sys
+from pathlib import Path
 
 import pyflip as flp
 
@@ -123,7 +120,7 @@ class Tests(unittest.TestCase):
         model += flp.Constraint(-v1 + v2, '>=', v3 / 3 - 7.5)
 
         full_lp_filename = flp.write_lp_file(model, 'test.lp')
-        p = pathlib.Path(full_lp_filename)
+        p = Path(full_lp_filename)
         self.assertEqual(p.is_file(), True)
         p.unlink()
 
@@ -206,5 +203,9 @@ class Tests(unittest.TestCase):
         # MIPStart values read for 2 variables
 
 
+def run():
+    this_module = sys.modules[__name__]
+    unittest.main(this_module)
+
 if __name__ == '__main__':
-    unittest.main()
+    run()

@@ -1,11 +1,8 @@
-from abc import ABC, abstractmethod
-import time
-import shutil
 import subprocess
 import os
-import io
-import pdb
-import itertools
+from abc import ABC, abstractmethod
+from shutil import which
+from itertools import count
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -63,7 +60,7 @@ class IPSolverCL(IPSolver, ABC):
             if not os.access(path_to_solver, os.R_OK):
                 raise RuntimeError(f'Provided path to solver {path_to_solver} is not valid executable')
         else:
-            path_to_solver = shutil.which(self.solver_binary)
+            path_to_solver = which(self.solver_binary)
             if path_to_solver is None:
                 raise RuntimeError(f'Could not find an executable {self.solver_binary} on system PATH')
 
@@ -259,7 +256,7 @@ class CbcCL(IPSolverCL):
 
         filename = f'{run.name}.mst'
         with open(filename, 'w') as fo:
-            ctr = itertools.count() # required for formatting
+            ctr = count() # required for formatting
             for var_name, val in soln.var_dict.items():
                 fo.write(f'{next(ctr)} {var_name} {val}\n')
 

@@ -1,8 +1,8 @@
 """
 Utility functions and constant values
 """
-import uuid
-import time
+from uuid import uuid4
+from time import strftime
 
 EPS = 1E-9
 
@@ -10,8 +10,8 @@ def sign(val):
     return '+' if val >= 0 else '-'
 
 def unique_name(prefix='', trunc_uuid_len=0):
-    time_str = time.strftime('%Y_%m_%d-%H_%M_%S')
-    hex_uuid = uuid.uuid4().hex[-trunc_uuid_len:]
+    time_str = strftime('%Y_%m_%d-%H_%M_%S')
+    hex_uuid = uuid4().hex[-trunc_uuid_len:]
     if prefix:
         return f'{prefix}-{time_str}-{hex_uuid}'
     else:

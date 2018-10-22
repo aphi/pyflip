@@ -1,13 +1,12 @@
-import os
-import itertools
-import enum
+from itertools import count
+from enum import Enum
 from collections import Iterable
 
 import pyflip as flp
-from variable import Variable
+from .variable import Variable
 
 class Model:
-    counter = itertools.count()
+    counter = count()
     def __init__(self, name=None):
         if name is None:
             name = f'Model_{next(Model.counter)}'
@@ -106,7 +105,7 @@ class Model:
 
 
 class Objective:
-    counter = itertools.count()
+    counter = count()
     def __init__(self, dir='min', expr=None, name=None):
         if name is None:
             name = f'obj_{next(Objective.counter)}'
@@ -123,7 +122,7 @@ class Objective:
 
 
 class Constraint:
-    counter = itertools.count()
+    counter = count()
     def __init__(self, lhs=None, mid=None, rhs=None, name=None):
         if name is None:
             name = f'con_{next(Constraint.counter)}'
@@ -153,7 +152,7 @@ class Constraint:
         return f'{self.name}: {self.lhs} {self.mid} {self.rhs}'
 
 
-class ConstraintEq(enum.Enum):
+class ConstraintEq(Enum):
     LEQ = '<='
     EQ = '='
     GEQ = '>='
