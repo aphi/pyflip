@@ -13,7 +13,7 @@ from .src.parameter import *
 # keep relative namespace
 from .src import variable
 from .src import solver
-from .src import utils
+from .src import util
 
 from .test import stress_test
 from .test import unit_test

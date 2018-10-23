@@ -17,11 +17,7 @@ class Variable(ABC):
         if name is None:
             name = f'var_{next(Variable.counter)}'
 
-        elif not isinstance(name, str): #TODO: put these checks in a utility function in utils.py
-            raise RuntimeError(f'Variable names must be strings, not "{type(name)}"')
-        elif not name.isidentifier():
-            raise RuntimeError(f'Variable name "{name}" is an invalid identifier')
-
+        flp.util.verify_valid_name(name)
         self.name = name
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound

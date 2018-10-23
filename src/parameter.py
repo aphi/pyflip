@@ -7,6 +7,8 @@ class ParameterSet(OrderedDict):
         self.solver_mapping = solver_mapping if solver_mapping is not None else {}
         #  OrderedDict() # keys are solver param names, values are Parameter objects
 
+    def __repr__(self):
+        return '\n ' + '\n '.join([f'{k}={v}' for k, v in self.items()])
 
     def set_pyflip_params(self, pyflip_param_dict, auto_include=True):
         """
@@ -46,4 +48,5 @@ class Parameter:
         self.pyflip_name = pyflip_name
         self.auto_include = auto_include
 
-    # def __repr__(self):
+    def __repr__(self):
+        return str(self.value)

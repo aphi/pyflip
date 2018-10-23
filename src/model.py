@@ -11,6 +11,7 @@ class Model:
         if name is None:
             name = f'Model_{next(Model.counter)}'
 
+        flp.util.verify_valid_name(name)
         self.name = name
         self.variables = {}
         self.objective = Objective()
@@ -110,6 +111,8 @@ class Objective:
         if name is None:
             name = f'obj_{next(Objective.counter)}'
 
+        flp.util.verify_valid_name(name)
+
         self.expr = flp.Expression(expr) if expr is not None else flp.Expression()
         self.dir = dir
         self.name = name
@@ -127,6 +130,9 @@ class Constraint:
         if name is None:
             name = f'con_{next(Constraint.counter)}'
 
+        flp.util.verify_valid_name(name)
+        # flp.util.verify(mid, ConstraintEq)
+
         self.lhs = flp.Expression(lhs) if lhs is not None else flp.Expression()
         self.rhs = flp.Expression(rhs) if rhs is not None else flp.Expression()
         self.mid = mid if mid is not None else '<='
@@ -134,6 +140,7 @@ class Constraint:
 
         # rearrange constraint expressions
         self._lhs, self._rhs = flp.Expression.rearrange_ineq(lhs, rhs)
+        # self._name = self.name.replace('')
 
     def is_satisfied(self, soln):
         """
@@ -143,9 +150,9 @@ class Constraint:
         """
         lhs_value = self.lhs.value(soln)
         rhs_value = self.rhs.value(soln)
-        return (self.mid == ConstraintEq.EQ and lhs_value == rhs_value) or \
-            (self.mid == ConstraintEq.LEQ and lhs_value <= rhs_value) or \
-            (self.mid == ConstraintEq.GEQ and lhs_value >= rhs_value)
+        return (self.mid == ConstraintEq.EQ.value and abs(lhs_value - rhs_value) <= flp.util.EPS) or \
+            (self.mid == ConstraintEq.LEQ.value and lhs_value - rhs_value <= flp.util.EPS) or \
+            (self.mid == ConstraintEq.GEQ.value and lhs_value - rhs_value >= -flp.util.EPS)
 
 
     def __repr__(self):

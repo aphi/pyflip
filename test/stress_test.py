@@ -65,7 +65,7 @@ def big_ip_model_1(solver):
 
     print('Solved', time.time() - t)
 
-    print(flp.utils.run_summary(run, soln, model))
+    print(flp.util.run_summary(run, soln, model))
 
 
 def expression_generation():

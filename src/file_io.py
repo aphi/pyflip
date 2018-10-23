@@ -15,7 +15,7 @@ def write_lp_file(model, filename, directory='.'):
     with open(full_filename, 'w') as fp:
 
         # Title section
-        fp.write(f'\{model.name}\n')
+        fp.write(f'{model.name}\n')
 
         # Objective function
         fp.write(f'{model.objective.dir}\n')

@@ -130,13 +130,13 @@ class Expression:
             terms.append(f'{coef} {var_name}')
 
             for (var_name, coef) in var_iter:
-                terms.append(f'{flp.utils.sign(coef)} {abs(coef)} {var_name}')
+                terms.append(f'{flp.util.sign(coef)} {abs(coef)} {var_name}')
 
         # constant
         if (not self.var_dict): # when there are no variables, always print (even if zero)
-            terms.append(f'{flp.utils.sign(self.constant)}{abs(self.constant)}')
-        elif (abs(self.constant) > flp.utils.EPS): # when there are variables only print when nonzero
-            terms.append(f'{flp.utils.sign(self.constant)} {abs(self.constant)}')
+            terms.append(f'{flp.util.sign(self.constant)}{abs(self.constant)}')
+        elif (abs(self.constant) > flp.util.EPS): # when there are variables only print when nonzero
+            terms.append(f'{flp.util.sign(self.constant)} {abs(self.constant)}')
 
         return ' '.join(terms)
 

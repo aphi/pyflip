@@ -10,3 +10,6 @@ class Solution:
             return self.var_dict[var_name]
         except KeyError:
             raise KeyError(f'This solution does not include the variable {var_name}')
+
+    def __repr__(self):
+        return '\n'.join([f'{k}={v}' for k, v in self.var_dict.items()])
