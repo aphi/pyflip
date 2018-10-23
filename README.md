@@ -92,7 +92,7 @@ x_1=5.0
 x_2=4.0
 ```
 
-##### See more complex examples in the [Documentation](https://aphi.github.io/PyFlip/)
+##### See more complex examples in the [Documentation](docs/readme.md)
 
 
 ## Features & Roadmap
