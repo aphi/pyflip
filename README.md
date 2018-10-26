@@ -19,11 +19,14 @@ Feature requests and PRs are welcome.
 
 Presently: download or clone this repository. Will be on PyPi soon.
 
+```
+$ pip install pyflip
+```
+
 #### Testing
 
 ```
->>> import pyflip as flp
->>> flp.unit_test.run()
+$ python -c "import pyflip; pyflip.test.unit_test.run()"
 ...........                                                           
 ----------------------------------------------------------------------
 Ran 11 tests in 0.329s                                                
