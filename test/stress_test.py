@@ -88,8 +88,8 @@ def run():
     # timeit.timeit(big_ip_model_1(solver), number=1)
 
     solvers = [
-        # flp.solver.Cbc,
-        flp.solver.Gurobi
+        flp.solver.Cbc,
+        # flp.solver.Gurobi
     ]
     for solver in solvers:
         print(timeit.timeit(functools.partial(big_ip_model_1, solver()), number=1))

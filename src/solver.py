@@ -5,6 +5,7 @@ from shutil import which
 from itertools import count
 from collections import OrderedDict
 from copy import deepcopy
+from platform import system
 
 import pyflip as flp
 
@@ -54,17 +55,33 @@ class IPSolverCL(IPSolver, ABC):
         :param path_to_solver: Specify path to solver executable
         """
         super().__init__(pyflip_params or {}, solver_params or {})
+        self.path_to_solver = self.find_cl_executable(path_to_solver)
 
-        # Find command-line executable
+
+    def find_cl_executable(self, path_to_solver):
+        """
+        Find an executable
+        """
+        # First choice: Provided solver path. Raise error if provided path fails
         if path_to_solver is not None:
-            if not os.access(path_to_solver, os.R_OK):
+            if os.access(path_to_solver, os.R_OK):
+                return path_to_solver
+            else:
                 raise RuntimeError(f'Provided path to solver {path_to_solver} is not valid executable')
-        else:
-            path_to_solver = which(self.solver_binary)
-            if path_to_solver is None:
-                raise RuntimeError(f'Could not find an executable {self.solver_binary} on system PATH')
 
-        self.path_to_solver = path_to_solver
+        # Second choice: Pyflip-packaged solver (CBC only for now)
+        if (self.solver_binary in ('cbc',)) and system() == "Windows":
+            path_to_solver = os.path.join(flp.ROOT_DIR, 'bin', 'win_32', 'cbc.exe')
+            if os.access(path_to_solver, os.R_OK):
+                return path_to_solver
+
+        # Third choice: solver search on system PATH
+        path_to_solver = which(self.solver_binary) # check for this binary on path
+        if path_to_solver is not None:
+            return path_to_solver
+
+        raise RuntimeError(f'Could not find an executable {self.solver_binary} on system PATH or in pyflip binaries')
+
 
     @property
     @abstractmethod
