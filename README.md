@@ -1,5 +1,8 @@
 # PyFlip
 
+[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+[![Build status](https://ci.appveyor.com/api/projects/status/mgi67kkcrd9rg0hg?svg=true)](https://ci.appveyor.com/project/aphi/pyflip)
+
 PyFlip is a simple and modern library for Linear and Integer Programming in Python 3, offering an API to advanced solvers.
 
 A major focus is features which speed up the model development process, e.g. prototyping, debugging, profiling, and integrating with metaheuristic algorithms.
