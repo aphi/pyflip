@@ -11,7 +11,7 @@ setuptools.setup(
 A major focus is features which speed up the model development process, e.g. prototyping, debugging, profiling, and integrating with metaheuristic algorithms.
 This project has been written from scratch in 2018, having been inspired by PuLP, CyLP, rust-lp-modeler, and JuMP.
 
-See full documentation on the project homepage.""",
+See full documentation on the project homepage: https://github.com/aphi/PyFlip """,
     url="https://github.com/aphi/pyflip",
     keywords='linear integer mathematical optimisation',
     package_dir = {'pyflip': ''},
@@ -27,7 +27,6 @@ See full documentation on the project homepage.""",
         'bin/win_32/LICENSE.txt',
     ]},
     include_package_data=True,
-    install_requires=['matplotlib'],
     license='MIT',
     classifiers=[
         "Programming Language :: Python :: 3.6",

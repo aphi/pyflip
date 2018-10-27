@@ -17,8 +17,6 @@ Feature requests and PRs are welcome.
 
 #### Installation
 
-Presently: download or clone this repository. Will be on PyPi soon.
-
 ```
 $ pip install pyflip
 ```
@@ -47,11 +45,10 @@ Create a *Model* object
 
 Create *Continuous* variables bounded between 0 and 5.
 
-Variables must be explicitly added to the model before being used in the objective or constraints.
 ```python
 >>> x_1 = flp.variable.Continuous('x_1', 0, 5)
 >>> x_2 = flp.variable.Continuous('x_2', 0, 5)
->>> model += x_1, x_2
+>>> model += x_1, x_2 # variables must be explicitly added to the model
 ```
 
 Define an *Objective* by specifying a direction ('min' or 'max') and an expression.
