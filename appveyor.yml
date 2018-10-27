@@ -1,0 +1,24 @@
+environment:
+  matrix:
+  - platform: x86
+    PYDIR: C:\Python36
+
+  - platform: x64
+    PYDIR: C:\Python36
+
+  - platform: x86
+    PYDIR: C:\Python37
+
+  - platform: x64
+    PYDIR: C:\Python37
+
+  - platform: x64
+    PYDIR: C:\Python37-x64
+
+install:
+  - "%PYDIR%\\python setup.py install"
+
+build: off
+
+test_script:
+  - "%PYDIR%\\python -c \"import pyflip as flp; flp.unit_test.run()\""
