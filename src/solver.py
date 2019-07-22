@@ -335,7 +335,7 @@ class CbcCL(IPSolverCL):
         # Run solver
         with run:
             run.log_fo.flush()
-            p = subprocess.run(cmd, stdout=run.log_fo, stderr=run.log_fo)
+            p = subprocess.run(cmd, stdout=run.log_fo, stderr=run.log_fo, shell=True)
 
         # Read solution file and logfile (solver-specific)
         soln = self.read_output_files(run, model)

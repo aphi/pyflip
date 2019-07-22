@@ -1,8 +1,12 @@
 import setuptools
 
+# Build and push to PyPI with:
+# python setup.py bdist_wheel
+# twine upload dist/*
+
 setuptools.setup(
     name="pyflip",
-    version="0.1.1",
+    version="0.1.3",
     author="Antony Phillips",
     author_email="antony.e.phillips@gmail.com",
     description="A simple and modern library for Linear and Integer Programming in Python 3",
